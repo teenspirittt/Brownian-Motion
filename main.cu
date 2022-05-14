@@ -21,17 +21,17 @@ void drawPoint();
 void spawnPoint();
 void movePoint(int i);
 
-typedef struct snowFlake {
+typedef struct particle {
   float posX;
   float posY;
   float destX;
   float destY;
-} snowFlake;
+} particle;
 
-snowFlake* flake = NULL;
-snowFlake* dev_flake = NULL;
+particle* flake = NULL;
+particle* dev_flake = NULL;
 
-__global__ void kernel(unsigned int seed, snowFlake* flake) {
+__global__ void kernel(unsigned int seed, particle* flake) {
   unsigned i = threadIdx.x + blockIdx.x * blockDim.x;
 
   int idx = threadIdx.x + blockDim.x * blockIdx.x;
@@ -65,10 +65,10 @@ void drawPoint() {
   glBegin(GL_POINTS);
   glColor3f(1, 1, 1);
 
-  cudaMemcpy(dev_flake, flake, sizeof(snowFlake) * MAX_FLAKES,
+  cudaMemcpy(dev_flake, flake, sizeof(particle) * MAX_FLAKES,
              cudaMemcpyHostToDevice);
   kernel<<<5, 1000>>>(time(NULL), dev_flake);
-  cudaMemcpy(flake, dev_flake, sizeof(snowFlake) * MAX_FLAKES,
+  cudaMemcpy(flake, dev_flake, sizeof(particle) * MAX_FLAKES,
              cudaMemcpyDeviceToHost);
   cudaDeviceSynchronize();
   for (int i = 0; i < MAX_FLAKES; ++i) {
@@ -86,8 +86,8 @@ void spawnPoint() {
   glClearColor(0, 0, 0, 0);
   glScalef((float)1 / 640, (float)1 / 360, 1);
   glMatrixMode(GL_PROJECTION);
-  flake = (snowFlake*)malloc(sizeof(snowFlake) * MAX_FLAKES);
-  cudaMalloc((void**)&dev_flake, sizeof(snowFlake) * MAX_FLAKES);
+  flake = (particle*)malloc(sizeof(particle) * MAX_FLAKES);
+  cudaMalloc((void**)&dev_flake, sizeof(particle) * MAX_FLAKES);
 
   for (int i = 0; i < MAX_FLAKES; ++i) {
     flake[i].posX = (-640 + rand() % 1280);
@@ -97,7 +97,7 @@ void spawnPoint() {
     flake[i].destX = 0;
     flake[i].destY = 0;
   }
-  cudaMemcpy(dev_flake, flake, sizeof(snowFlake) * MAX_FLAKES,
+  cudaMemcpy(dev_flake, flake, sizeof(particle) * MAX_FLAKES,
              cudaMemcpyHostToDevice);
   glLoadIdentity();
   glMatrixMode(GL_MODELVIEW);
@@ -113,7 +113,7 @@ int main(int argc, char** argv) {
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
   glutInitWindowSize(1280, 720);
   glutInitWindowPosition(400, 150);
-  glutCreateWindow("takov put'");
+  glutCreateWindow("Brownian Motion");
   glutDisplayFunc(drawPoint);
   glutTimerFunc(30, timer, 0);
   spawnPoint();
