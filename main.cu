@@ -65,13 +65,13 @@ void drawPoint() {
   glBegin(GL_POINTS);
   glColor3f(1, 1, 1);
 
-  cudaMemcpy(dev_flake, flake, sizeof(particle) * MAX_FLAKES,
+  cudaMemcpy(dev_flake, flake, sizeof(particle) * MAX_PATRICLES,
              cudaMemcpyHostToDevice);
   kernel<<<5, 1000>>>(time(NULL), dev_flake);
-  cudaMemcpy(flake, dev_flake, sizeof(particle) * MAX_FLAKES,
+  cudaMemcpy(flake, dev_flake, sizeof(particle) * MAX_PATRICLES,
              cudaMemcpyDeviceToHost);
   cudaDeviceSynchronize();
-  for (int i = 0; i < MAX_FLAKES; ++i) {
+  for (int i = 0; i < MAX_PATRICLES; ++i) {
     glColor3f(0, (float)(flake[i].posX + 640) / 1280,
               1 - (float)(flake[i].posX + 640) / 1280);
     glVertex2f(flake[i].posX, (flake[i].posY));
@@ -86,10 +86,10 @@ void spawnPoint() {
   glClearColor(0, 0, 0, 0);
   glScalef((float)1 / 640, (float)1 / 360, 1);
   glMatrixMode(GL_PROJECTION);
-  flake = (particle*)malloc(sizeof(particle) * MAX_FLAKES);
-  cudaMalloc((void**)&dev_flake, sizeof(particle) * MAX_FLAKES);
+  flake = (particle*)malloc(sizeof(particle) * MAX_PATRICLES);
+  cudaMalloc((void**)&dev_flake, sizeof(particle) * MAX_PATRICLES);
 
-  for (int i = 0; i < MAX_FLAKES; ++i) {
+  for (int i = 0; i < MAX_PATRICLES; ++i) {
     flake[i].posX = (-640 + rand() % 1280);
     flake[i].posY = (-360 + rand() % 720);
     // flake[i].destX = (-640 + rand() % 1280);
@@ -97,7 +97,7 @@ void spawnPoint() {
     flake[i].destX = 0;
     flake[i].destY = 0;
   }
-  cudaMemcpy(dev_flake, flake, sizeof(particle) * MAX_FLAKES,
+  cudaMemcpy(dev_flake, flake, sizeof(particle) * MAX_PATRICLES,
              cudaMemcpyHostToDevice);
   glLoadIdentity();
   glMatrixMode(GL_MODELVIEW);
